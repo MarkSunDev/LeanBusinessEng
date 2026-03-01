@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import Image from "next/image";
 import { Sidebar } from "./Sidebar";
 
 export function AppShell({ children }: { children: React.ReactNode }) {
@@ -39,9 +40,10 @@ export function AppShell({ children }: { children: React.ReactNode }) {
               <line x1="3" y1="18" x2="21" y2="18" />
             </svg>
           </button>
-          <span className="text-[15px] font-bold text-[var(--text-primary)]">
-            LeanBizEng
-          </span>
+          <div className="w-7 h-7 rounded-[var(--radius-sm)] border border-[var(--border-light)] bg-white flex items-center justify-center overflow-hidden">
+            <Image src="/icon.png" alt="Chimera Logo" width={22} height={22} />
+          </div>
+          <span className="text-[15px] font-bold text-[var(--text-primary)]">Chimera</span>
         </header>
 
         <main className="flex-1 overflow-y-auto">

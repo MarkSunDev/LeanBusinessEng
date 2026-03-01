@@ -1,6 +1,7 @@
 "use client";
 
 import Link from "next/link";
+import Image from "next/image";
 import { usePathname } from "next/navigation";
 import { useLiveQuery } from "dexie-react-hooks";
 import { db, getStreakDays } from "@/lib/db";
@@ -43,12 +44,12 @@ export function Sidebar({ onClose }: { onClose?: () => void }) {
       {/* Logo */}
       <div className="px-5 py-5 border-b border-[var(--border-light)]">
         <Link href="/" onClick={onClose} className="flex items-center gap-2.5">
-          <div className="w-9 h-9 rounded-[var(--radius-md)] bg-gradient-to-br from-[var(--primary)] to-[var(--primary-dark)] flex items-center justify-center text-white text-lg font-bold">
-            L
+          <div className="w-9 h-9 rounded-[var(--radius-md)] border border-[var(--border-light)] bg-white flex items-center justify-center overflow-hidden">
+            <Image src="/icon.png" alt="Chimera Logo" width={30} height={30} />
           </div>
           <div>
             <h1 className="text-[15px] font-bold text-[var(--text-primary)] leading-tight">
-              LeanBizEng
+              Chimera
             </h1>
             <p className="text-[11px] text-[var(--text-tertiary)] leading-tight">
               职场英语学习助手

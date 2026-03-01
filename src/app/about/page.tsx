@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import Image from "next/image";
 
 interface VersionHistory {
   version: string;
@@ -51,11 +52,11 @@ export default function AboutPage() {
     <div className="max-w-2xl mx-auto fade-in">
       {/* 头部 */}
       <div className="text-center mb-8">
-        <div className="w-20 h-20 mx-auto mb-4 rounded-[var(--radius-lg)] bg-gradient-to-br from-[var(--primary)] to-[var(--primary-dark)] flex items-center justify-center text-white text-3xl font-bold">
-          L
+        <div className="w-20 h-20 mx-auto mb-4 rounded-[var(--radius-lg)] border border-[var(--border-light)] bg-white flex items-center justify-center overflow-hidden">
+          <Image src="/icon.png" alt="Chimera Logo" width={64} height={64} />
         </div>
         <h1 className="text-[24px] font-bold text-[var(--text-primary)] mb-2">
-          LeanBizEng
+          Chimera
         </h1>
         <p className="text-[16px] text-[var(--text-secondary)] italic">
           "{randomSlogan}"
@@ -187,7 +188,7 @@ export default function AboutPage() {
       {/* 底部信息 */}
       <div className="text-center mt-8 text-[12px] text-[var(--text-tertiary)]">
         <p>Made with ❤️ for English learners</p>
-        <p className="mt-1">© 2026 LeanBizEng</p>
+        <p className="mt-1">© 2026 Chimera</p>
       </div>
     </div>
   );

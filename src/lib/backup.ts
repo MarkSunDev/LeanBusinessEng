@@ -150,11 +150,11 @@ export async function performBackup(): Promise<boolean> {
     const date = new Date();
     const dateStr = date.toISOString().slice(0, 10);
     const timeStr = date.toTimeString().slice(0, 8).replace(/:/g, "-");
-    const fileName = `leanbizeng_backup_${dateStr}_${timeStr}.json`;
+    const fileName = `chimera_backup_${dateStr}_${timeStr}.json`;
 
     // 创建或覆盖主备份文件
     const mainFileHandle = await backupState.directoryHandle.getFileHandle(
-      "leanbizeng_backup_latest.json",
+      "chimera_backup_latest.json",
       { create: true }
     );
     const mainWritable = await mainFileHandle.createWritable();
@@ -191,7 +191,7 @@ export function downloadBackupFile(data: unknown): void {
   const date = new Date();
   const dateStr = date.toISOString().slice(0, 10);
   const timeStr = date.toTimeString().slice(0, 8).replace(/:/g, "-");
-  const fileName = `leanbizeng_backup_${dateStr}_${timeStr}.json`;
+  const fileName = `chimera_backup_${dateStr}_${timeStr}.json`;
 
   const a = document.createElement("a");
   a.href = url;

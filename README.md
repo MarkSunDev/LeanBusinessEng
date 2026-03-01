@@ -1,7 +1,7 @@
-# LeanBizEng · 职场英语学习助手
+# Chimera · 职场英语学习助手
 
 <p align="center">
-  <img src="src/app/icon.png" width="80" alt="LeanBizEng Logo" />
+  <img src="src/app/icon.png" width="80" alt="Chimera Logo" />
 </p>
 
 面向职场人士的 AI 驱动英语学习平台。从真实工作素材中提取核心词汇与句式，通过科学的间隔重复和主动造句测验，高效提升商务英语能力。
