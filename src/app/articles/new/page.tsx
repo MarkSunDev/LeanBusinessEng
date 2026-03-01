@@ -180,12 +180,17 @@ export default function NewArticlePage() {
   if (step === "input" || step === "parsing") {
     return (
       <div className="max-w-3xl mx-auto fade-in">
-        <h2 className="text-[22px] font-bold text-[var(--text-primary)] mb-1">
+        <div className="flex items-center justify-between mb-1">
+        <h2 className="text-[22px] font-bold text-[var(--text-primary)]">
           添加学习内容
         </h2>
-        <p className="text-[14px] text-[var(--text-secondary)] mb-6">
-          粘贴工作中的英语邮件、会议纪要、报告等内容，AI 将自动解析核心词汇和句式
-        </p>
+        <Link href="/articles/batch" className="text-[13px] text-[var(--primary)] hover:underline">
+          批量添加 →
+        </Link>
+      </div>
+      <p className="text-[14px] text-[var(--text-secondary)] mb-6">
+        粘贴工作中的英语邮件、会议纪要、报告等内容，AI 将自动解析核心词汇和句式
+      </p>
 
         <form onSubmit={(e) => { e.preventDefault(); handleParse(); }} className="space-y-5">
           <div>
