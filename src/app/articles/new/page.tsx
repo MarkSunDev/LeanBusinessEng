@@ -6,7 +6,7 @@ import { db, getOrCreateTodayLog, isAIConfigured } from "@/lib/db";
 import { analyzeContent, generateStudyPlan } from "@/lib/ai";
 import Link from "next/link";
 
-type Step = "input" | "parsing" | "parsed" | "generating-plan" | "completed";
+type Step = "input" | "parsing" | "completed";
 
 export default function NewArticlePage() {
   const router = useRouter();
@@ -15,6 +15,8 @@ export default function NewArticlePage() {
   const [step, setStep] = useState<Step>("input");
   const [error, setError] = useState("");
   const [notConfigured, setNotConfigured] = useState(false);
+  const [generatingPlan, setGeneratingPlan] = useState(false);
+  const [hasPlan, setHasPlan] = useState(false);
 
   // 解析结果缓存
   const [parsedData, setParsedData] = useState<{
@@ -23,9 +25,10 @@ export default function NewArticlePage() {
     vocabularies: Array<any>;
     patterns: Array<any>;
   } | null>(null);
+  const [savedArticleId, setSavedArticleId] = useState<number | null>(null);
 
   async function handleParse(retryCount = 0) {
-    if (!title.trim() || !content.trim()) return;
+    if (!content.trim()) return;
 
     const configured = await isAIConfigured();
     if (!configured) {
@@ -46,7 +49,11 @@ export default function NewArticlePage() {
       });
 
       setParsedData(data);
-      setStep("parsed");
+
+      // 直接保存文章（不生成计划）
+      const articleId = await saveArticleDirectly(data);
+      setSavedArticleId(articleId);
+      setStep("completed");
     } catch (err) {
       const message = err instanceof Error ? err.message : "解析失败";
       setError(message);
@@ -54,38 +61,17 @@ export default function NewArticlePage() {
     }
   }
 
-  async function handleGeneratePlan() {
-    if (!parsedData) return;
-
-    setStep("generating-plan");
-    setError("");
-
-    try {
-      const studyPlan = await generateStudyPlan(
-        content,
-        parsedData.vocabularies.length,
-        parsedData.patterns.length
-      );
-
-      await saveArticle(studyPlan);
-    } catch (err) {
-      const message = err instanceof Error ? err.message : "生成学习计划失败";
-      setError(message);
-      setStep("parsed"); // 回到已解析状态，允许用户选择跳过
-    }
-  }
-
-  async function saveArticle(studyPlan?: any) {
-    if (!parsedData) return;
+  async function saveArticleDirectly(data: typeof parsedData): Promise<number> {
+    if (!data) throw new Error("没有解析数据");
 
     const now = new Date();
 
     const articleId = await db.articles.add({
-      title: title.trim(),
+      title: title.trim() || "未命名内容",
       content: content.trim(),
-      parsedHtml: parsedData.parsedHtml,
-      sentences: parsedData.sentences,
-      studyPlan: studyPlan || null,
+      parsedHtml: data.parsedHtml,
+      sentences: data.sentences,
+      studyPlan: undefined,
       createdAt: now,
       updatedAt: now,
     });
@@ -93,13 +79,13 @@ export default function NewArticlePage() {
     let newWordCount = 0;
     let newPatternCount = 0;
 
-    if (parsedData.vocabularies?.length) {
+    if (data.vocabularies?.length) {
       // 新内容的复习时间从明天开始，不影响今天的复习计划
       const tomorrow = new Date(now);
       tomorrow.setDate(tomorrow.getDate() + 1);
       tomorrow.setHours(0, 0, 0, 0);
 
-      const vocabRecords = parsedData.vocabularies.map((v) => ({
+      const vocabRecords = data.vocabularies.map((v) => ({
         articleId: articleId as number,
         word: v.word,
         definition: v.definition,
@@ -119,13 +105,13 @@ export default function NewArticlePage() {
       newWordCount = vocabRecords.length;
     }
 
-    if (parsedData.patterns?.length) {
+    if (data.patterns?.length) {
       // 新内容的复习时间从明天开始，不影响今天的复习计划
       const patternTomorrow = new Date(now);
       patternTomorrow.setDate(patternTomorrow.getDate() + 1);
       patternTomorrow.setHours(0, 0, 0, 0);
 
-      const patternRecords = parsedData.patterns.map((p) => ({
+      const patternRecords = data.patterns.map((p) => ({
         articleId: articleId as number,
         pattern: p.pattern,
         explanation: p.explanation,
@@ -151,7 +137,35 @@ export default function NewArticlePage() {
       newPatternsLearned: log.newPatternsLearned + newPatternCount,
     });
 
-    router.push(`/articles/${articleId}`);
+    return articleId as number;
+  }
+
+  async function handleGeneratePlan() {
+    if (!parsedData || !savedArticleId) return;
+
+    setGeneratingPlan(true);
+    setError("");
+
+    try {
+      const studyPlan = await generateStudyPlan(
+        content,
+        parsedData.vocabularies.length,
+        parsedData.patterns.length
+      );
+
+      // 更新文章的学习计划
+      await db.articles.update(savedArticleId, {
+        studyPlan: studyPlan,
+        updatedAt: new Date(),
+      });
+
+      setHasPlan(true);
+    } catch (err) {
+      const message = err instanceof Error ? err.message : "生成学习计划失败";
+      setError(message);
+    } finally {
+      setGeneratingPlan(false);
+    }
   }
 
   // 输入步骤
@@ -168,7 +182,7 @@ export default function NewArticlePage() {
         <form onSubmit={(e) => { e.preventDefault(); handleParse(); }} className="space-y-5">
           <div>
             <label className="block text-[13px] font-medium text-[var(--text-primary)] mb-1.5">
-              标题
+              标题 <span className="text-[var(--text-tertiary)] font-normal">（可选）</span>
             </label>
             <input
               type="text"
@@ -176,14 +190,13 @@ export default function NewArticlePage() {
               onChange={(e) => setTitle(e.target.value)}
               placeholder="例如：Q4季度总结会议纪要、客户合作邮件"
               className="input"
-              required
               disabled={step === "parsing"}
             />
           </div>
 
           <div>
             <label className="block text-[13px] font-medium text-[var(--text-primary)] mb-1.5">
-              英语原文
+              英语原文 <span className="text-red-500">*</span>
             </label>
             <textarea
               value={content}
@@ -232,7 +245,7 @@ export default function NewArticlePage() {
           <div className="flex items-center gap-3 pt-1">
             <button
               type="submit"
-              disabled={step === "parsing" || !title.trim() || !content.trim()}
+              disabled={step === "parsing" || !content.trim()}
               className="btn-primary"
             >
               {step === "parsing" ? (
@@ -258,15 +271,15 @@ export default function NewArticlePage() {
     );
   }
 
-  // 已解析步骤 - 显示解析结果并询问是否生成学习计划
-  if (step === "parsed" || step === "generating-plan") {
+  // 完成步骤 - 显示解析结果并提供生成学习计划选项
+  if (step === "completed") {
     return (
       <div className="max-w-3xl mx-auto fade-in">
         <h2 className="text-[22px] font-bold text-[var(--text-primary)] mb-1">
-          解析完成
+          ✅ 解析完成
         </h2>
         <p className="text-[14px] text-[var(--text-secondary)] mb-6">
-          AI 已成功解析内容，你可以选择生成学习计划或直接保存
+          内容已保存到学习库，你可以选择生成 AI 学习计划
         </p>
 
         {/* 解析结果预览 */}
@@ -318,40 +331,49 @@ export default function NewArticlePage() {
               <span>⚠️</span>
               <div className="flex-1">
                 <p>{error}</p>
-                <button
-                  type="button"
-                  onClick={handleGeneratePlan}
-                  className="mt-2 text-[var(--primary)] font-medium hover:underline"
-                >
-                  点击重试生成计划
-                </button>
+                {!hasPlan && (
+                  <button
+                    type="button"
+                    onClick={handleGeneratePlan}
+                    className="mt-2 text-[var(--primary)] font-medium hover:underline"
+                  >
+                    点击重试生成计划
+                  </button>
+                )}
               </div>
             </div>
           </div>
         )}
 
+        {hasPlan && (
+          <div className="p-3.5 bg-[var(--success-50)] border border-green-200 rounded-[var(--radius-md)] text-[13px] text-green-700 mb-4">
+            ✅ 学习计划已生成并保存
+          </div>
+        )}
+
         <div className="flex items-center gap-3">
-          <button
-            onClick={handleGeneratePlan}
-            disabled={step === "generating-plan"}
-            className="btn-primary"
+          {!hasPlan ? (
+            <button
+              onClick={handleGeneratePlan}
+              disabled={generatingPlan}
+              className="btn-primary"
+            >
+              {generatingPlan ? (
+                <>
+                  <span className="inline-block w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin" />
+                  生成学习计划...
+                </>
+              ) : (
+                "🎯 生成 AI 学习计划"
+              )}
+            </button>
+          ) : null}
+          <Link
+            href={`/articles/${savedArticleId}`}
+            className={hasPlan ? "btn-primary" : "btn-secondary"}
           >
-            {step === "generating-plan" ? (
-              <>
-                <span className="inline-block w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin" />
-                生成学习计划...
-              </>
-            ) : (
-              "生成学习计划并保存"
-            )}
-          </button>
-          <button
-            onClick={() => saveArticle()}
-            disabled={step === "generating-plan"}
-            className="btn-secondary"
-          >
-            跳过，直接保存
-          </button>
+            查看内容详情 →
+          </Link>
         </div>
       </div>
     );
