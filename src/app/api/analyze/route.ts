@@ -47,7 +47,6 @@ export async function POST(request: Request) {
       sentencesCount: data.sentences?.length || 0,
       vocabulariesCount: data.vocabularies?.length || 0,
       patternsCount: data.patterns?.length || 0,
-      hasStudyPlan: !!data.studyPlan,
     });
 
     return NextResponse.json({
@@ -55,7 +54,6 @@ export async function POST(request: Request) {
       sentences: data.sentences || [],
       vocabularies: data.vocabularies || [],
       patterns: data.patterns || [],
-      studyPlan: data.studyPlan || null,
     });
   } catch (error) {
     console.error("Analyze API error:", error);

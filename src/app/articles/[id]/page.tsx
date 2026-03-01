@@ -321,13 +321,41 @@ export default function ArticleDetailPage({
                 <p className="text-[14px] text-[var(--text-secondary)] mt-1.5">
                   {v.definition}
                 </p>
+                {/* 例句1 */}
                 {v.exampleSentence && (
                   <div className="mt-2 pl-3 border-l-2 border-[var(--border)]">
                     <p className="text-[13px] text-[var(--text-tertiary)] italic">
                       {v.exampleSentence}
                     </p>
+                    {v.exampleSentenceChinese && (
+                      <p className="text-[12px] text-[var(--text-secondary)] mt-0.5">
+                        {v.exampleSentenceChinese}
+                      </p>
+                    )}
                     <button
                       onClick={() => speakText(v.exampleSentence)}
+                      className="mt-1 text-[11px] text-[var(--primary)] hover:underline flex items-center gap-1"
+                    >
+                      <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                        <polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5"></polygon>
+                      </svg>
+                      朗读例句
+                    </button>
+                  </div>
+                )}
+                {/* 例句2 */}
+                {v.exampleSentence2 && (
+                  <div className="mt-2 pl-3 border-l-2 border-[var(--border)]">
+                    <p className="text-[13px] text-[var(--text-tertiary)] italic">
+                      {v.exampleSentence2}
+                    </p>
+                    {v.exampleSentence2Chinese && (
+                      <p className="text-[12px] text-[var(--text-secondary)] mt-0.5">
+                        {v.exampleSentence2Chinese}
+                      </p>
+                    )}
+                    <button
+                      onClick={() => speakText(v.exampleSentence2 || "")}
                       className="mt-1 text-[11px] text-[var(--primary)] hover:underline flex items-center gap-1"
                     >
                       <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
@@ -371,13 +399,41 @@ export default function ArticleDetailPage({
                 <p className="text-[14px] text-[var(--text-secondary)] mt-1.5">
                   {p.explanation}
                 </p>
+                {/* 例句1 */}
                 {p.exampleSentence && (
                   <div className="mt-2 pl-3 border-l-2 border-[var(--border)]">
                     <p className="text-[13px] text-[var(--text-tertiary)] italic">
                       {p.exampleSentence}
                     </p>
+                    {p.exampleSentenceChinese && (
+                      <p className="text-[12px] text-[var(--text-secondary)] mt-0.5">
+                        {p.exampleSentenceChinese}
+                      </p>
+                    )}
                     <button
                       onClick={() => speakText(p.exampleSentence)}
+                      className="mt-1 text-[11px] text-[var(--primary)] hover:underline flex items-center gap-1"
+                    >
+                      <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                        <polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5"></polygon>
+                      </svg>
+                      朗读例句
+                    </button>
+                  </div>
+                )}
+                {/* 例句2 */}
+                {p.exampleSentence2 && (
+                  <div className="mt-2 pl-3 border-l-2 border-[var(--border)]">
+                    <p className="text-[13px] text-[var(--text-tertiary)] italic">
+                      {p.exampleSentence2}
+                    </p>
+                    {p.exampleSentence2Chinese && (
+                      <p className="text-[12px] text-[var(--text-secondary)] mt-0.5">
+                        {p.exampleSentence2Chinese}
+                      </p>
+                    )}
+                    <button
+                      onClick={() => speakText(p.exampleSentence2 || "")}
                       className="mt-1 text-[11px] text-[var(--primary)] hover:underline flex items-center gap-1"
                     >
                       <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">

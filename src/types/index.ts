@@ -39,7 +39,14 @@ export interface Vocabulary {
   definition: string;
   /** 音标 */
   phonetic: string;
+  /** 例句1 */
   exampleSentence: string;
+  /** 例句1中文翻译 */
+  exampleSentenceChinese?: string;
+  /** 例句2 */
+  exampleSentence2?: string;
+  /** 例句2中文翻译 */
+  exampleSentence2Chinese?: string;
   /** 间隔重复相关 */
   nextReviewAt: Date;
   /** 复习间隔（天） */
@@ -60,7 +67,14 @@ export interface SentencePattern {
   pattern: string;
   /** 中文解释 */
   explanation: string;
+  /** 例句1 */
   exampleSentence: string;
+  /** 例句1中文翻译 */
+  exampleSentenceChinese?: string;
+  /** 例句2 */
+  exampleSentence2?: string;
+  /** 例句2中文翻译 */
+  exampleSentence2Chinese?: string;
   nextReviewAt: Date;
   interval: number;
   easeFactor: number;
