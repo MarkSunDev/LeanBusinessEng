@@ -57,24 +57,41 @@ LeanBizEng 是一款面向职场人士的英语学习工具，其核心理念是
 
 #### 用户流程
 ```
-输入标题和英语原文
+输入标题（可选）和英语原文
     ↓
 点击"开始解析"
     ↓
-AI 分两步处理：
-  步骤1：解析句子、词汇、句式
-  步骤2（可选）：生成学习计划
+AI 解析：
+  - 生成标题和标签（如用户未填标题）
+  - 解析句子、词汇、句式
     ↓
 保存到本地数据库
+    ↓
+可选：生成 AI 学习计划
 ```
+
+#### 批量添加功能
+支持一次性添加多篇内容：
+```
+# 标题1
+内容1...
+
+# 标题2
+内容2...
+```
+- 串行处理，避免同时请求过多AI接口
+- 显示进度条和每篇内容的处理状态
+- 支持重试失败的内容
 
 #### AI 解析内容
 | 字段 | 说明 | 用途 |
 |------|------|------|
+| `title` | AI生成的中文标题 | 自动命名文章 |
+| `tags` | AI生成的内容标签（1-3个） | 内容分类和检索 |
 | `sentences` | 逐句拆分，含中英文 | 句子级翻译学习 |
 | `vocabularies` | 核心词汇，含2个例句 | 单词学习和测验 |
 | `patterns` | 核心句式，含2个例句 | 句式学习和测验 |
-| `studyPlan` | 学习计划建议 | 学习目标设定 |
+| `studyPlan` | 学习计划建议（可选） | 学习目标设定 |
 
 #### 双例句系统
 每个词汇和句式配备两个例句：
@@ -444,6 +461,28 @@ try {
   showRetryButton();
 }
 ```
+
+### 5. 数据备份与恢复
+
+**File System Access API**
+```typescript
+// 选择备份目录
+const dirHandle = await window.showDirectoryPicker();
+// 创建备份文件
+const fileHandle = await dirHandle.getFileHandle("backup.json", { create: true });
+const writable = await fileHandle.createWritable();
+await writable.write(jsonData);
+await writable.close();
+```
+
+**自动同步机制**
+- 监听 IndexedDB 数据变化（creating/updating/deleting）
+- 防抖处理：数据变更后5秒执行备份
+- 同时创建时间戳历史备份和 latest 主备份
+
+**降级方案**
+- 不支持 File System Access API 的浏览器提供手动下载
+- 支持从 JSON 文件导入恢复数据
 
 ---
 
