@@ -1,0 +1,247 @@
+@import "tailwindcss";
+
+/* ===== Design System ===== */
+:root {
+  /* Primary - 深蓝绿色，专业但不冷淡 */
+  --primary: #0D9488;
+  --primary-light: #14B8A6;
+  --primary-dark: #0F766E;
+  --primary-50: #F0FDFA;
+  --primary-100: #CCFBF1;
+
+  /* Accent - 活力橙色，用于强调/成就 */
+  --accent: #F97316;
+  --accent-light: #FB923C;
+  --accent-50: #FFF7ED;
+
+  /* 语义色 */
+  --success: #22C55E;
+  --success-50: #F0FDF4;
+  --warning: #EAB308;
+  --warning-50: #FEFCE8;
+  --error: #EF4444;
+  --error-50: #FEF2F2;
+
+  /* 中性色 */
+  --bg: #F8FAFB;
+  --bg-card: #FFFFFF;
+  --bg-elevated: #F1F5F9;
+  --text-primary: #0F172A;
+  --text-secondary: #475569;
+  --text-tertiary: #94A3B8;
+  --border: #E2E8F0;
+  --border-light: #F1F5F9;
+
+  /* 圆角 */
+  --radius-sm: 8px;
+  --radius-md: 12px;
+  --radius-lg: 16px;
+  --radius-xl: 20px;
+  --radius-full: 9999px;
+
+  /* 阴影 */
+  --shadow-sm: 0 1px 2px rgba(0, 0, 0, 0.04);
+  --shadow-md: 0 4px 12px rgba(0, 0, 0, 0.06);
+  --shadow-lg: 0 8px 24px rgba(0, 0, 0, 0.08);
+  --shadow-glow: 0 0 20px rgba(13, 148, 136, 0.15);
+}
+
+/* ===== Base ===== */
+body {
+  background: var(--bg);
+  color: var(--text-primary);
+  font-family: -apple-system, BlinkMacSystemFont, "SF Pro Display", "PingFang SC",
+    "Microsoft YaHei", sans-serif;
+  -webkit-font-smoothing: antialiased;
+  font-size: 15px;
+  line-height: 1.6;
+}
+
+/* ===== Scrollbar ===== */
+::-webkit-scrollbar {
+  width: 6px;
+}
+::-webkit-scrollbar-track {
+  background: transparent;
+}
+::-webkit-scrollbar-thumb {
+  background: var(--text-tertiary);
+  border-radius: var(--radius-full);
+}
+::-webkit-scrollbar-thumb:hover {
+  background: var(--text-secondary);
+}
+
+/* ===== AI 解析高亮样式 ===== */
+.parsed-content {
+  line-height: 2;
+  font-size: 15.5px;
+}
+
+.parsed-content .keyword {
+  background: linear-gradient(135deg, #FEF3C7 0%, #FDE68A 100%);
+  font-weight: 600;
+  padding: 2px 6px;
+  border-radius: 4px;
+  cursor: help;
+  transition: all 0.2s;
+}
+
+.parsed-content .keyword:hover {
+  background: linear-gradient(135deg, #FDE68A 0%, #FCD34D 100%);
+  box-shadow: 0 0 0 2px rgba(251, 191, 36, 0.3);
+}
+
+.parsed-content .pattern {
+  background: linear-gradient(135deg, var(--primary-100) 0%, #A7F3D0 100%);
+  border-bottom: 2px solid var(--primary);
+  padding: 2px 6px;
+  border-radius: 4px;
+  cursor: help;
+  transition: all 0.2s;
+}
+
+.parsed-content .pattern:hover {
+  box-shadow: 0 0 0 2px rgba(13, 148, 136, 0.2);
+}
+
+/* ===== Card 通用 ===== */
+.card {
+  background: var(--bg-card);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-lg);
+  box-shadow: var(--shadow-sm);
+  transition: all 0.2s ease;
+}
+
+.card:hover {
+  box-shadow: var(--shadow-md);
+  border-color: #CBD5E1;
+}
+
+/* ===== Button 通用 ===== */
+.btn-primary {
+  background: linear-gradient(135deg, var(--primary) 0%, var(--primary-dark) 100%);
+  color: white;
+  border-radius: var(--radius-md);
+  font-weight: 500;
+  padding: 10px 20px;
+  font-size: 14px;
+  transition: all 0.2s ease;
+  border: none;
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+}
+
+.btn-primary:hover {
+  box-shadow: var(--shadow-glow);
+  transform: translateY(-1px);
+}
+
+.btn-primary:active {
+  transform: translateY(0);
+}
+
+.btn-primary:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+  transform: none;
+  box-shadow: none;
+}
+
+.btn-secondary {
+  background: var(--bg-elevated);
+  color: var(--text-primary);
+  border-radius: var(--radius-md);
+  font-weight: 500;
+  padding: 10px 20px;
+  font-size: 14px;
+  transition: all 0.2s ease;
+  border: 1px solid var(--border);
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+}
+
+.btn-secondary:hover {
+  background: #E2E8F0;
+  border-color: #CBD5E1;
+}
+
+.btn-accent {
+  background: linear-gradient(135deg, var(--accent) 0%, #EA580C 100%);
+  color: white;
+  border-radius: var(--radius-md);
+  font-weight: 500;
+  padding: 10px 20px;
+  font-size: 14px;
+  transition: all 0.2s ease;
+  border: none;
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+}
+
+.btn-accent:hover {
+  box-shadow: 0 0 20px rgba(249, 115, 22, 0.2);
+  transform: translateY(-1px);
+}
+
+/* ===== Input 通用 ===== */
+.input {
+  width: 100%;
+  padding: 10px 14px;
+  border: 1.5px solid var(--border);
+  border-radius: var(--radius-md);
+  font-size: 14px;
+  transition: all 0.2s;
+  outline: none;
+  background: var(--bg-card);
+  color: var(--text-primary);
+}
+
+.input:focus {
+  border-color: var(--primary);
+  box-shadow: 0 0 0 3px rgba(13, 148, 136, 0.1);
+}
+
+.input::placeholder {
+  color: var(--text-tertiary);
+}
+
+/* ===== 连续学习火焰动画 ===== */
+@keyframes flame {
+  0%, 100% { transform: scale(1); }
+  50% { transform: scale(1.15); }
+}
+
+.streak-flame {
+  animation: flame 1.5s ease-in-out infinite;
+  display: inline-block;
+}
+
+/* ===== 进度条动画 ===== */
+@keyframes progress-fill {
+  from { width: 0%; }
+}
+
+.progress-animated {
+  animation: progress-fill 0.8s ease-out;
+}
+
+/* ===== 淡入动画 ===== */
+@keyframes fade-in {
+  from { opacity: 0; transform: translateY(8px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+.fade-in {
+  animation: fade-in 0.3s ease-out;
+}
