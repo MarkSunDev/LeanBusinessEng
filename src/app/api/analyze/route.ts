@@ -37,12 +37,25 @@ export async function POST(request: Request) {
     let raw = completion.choices[0]?.message?.content ?? "{}";
     // Strip markdown code fences if present
     raw = raw.replace(/^```(?:json)?\s*\n?/i, "").replace(/\n?```\s*$/i, "");
+
+    console.log("AI raw response:", raw.substring(0, 500));
+
     const data = JSON.parse(raw);
+
+    console.log("AI parsed data:", {
+      hasParsedHtml: !!data.parsedHtml,
+      sentencesCount: data.sentences?.length || 0,
+      vocabulariesCount: data.vocabularies?.length || 0,
+      patternsCount: data.patterns?.length || 0,
+      hasStudyPlan: !!data.studyPlan,
+    });
 
     return NextResponse.json({
       parsedHtml: data.parsedHtml || content,
+      sentences: data.sentences || [],
       vocabularies: data.vocabularies || [],
       patterns: data.patterns || [],
+      studyPlan: data.studyPlan || null,
     });
   } catch (error) {
     console.error("Analyze API error:", error);

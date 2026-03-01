@@ -30,12 +30,24 @@ export default function NewArticlePage() {
 
     try {
       const data = await analyzeContent(content);
+
+      console.log("Frontend received data:", {
+        hasParsedHtml: !!data.parsedHtml,
+        sentencesCount: data.sentences?.length || 0,
+        vocabulariesCount: data.vocabularies?.length || 0,
+        patternsCount: data.patterns?.length || 0,
+        hasStudyPlan: !!data.studyPlan,
+        sentences: data.sentences,
+      });
+
       const now = new Date();
 
       const articleId = await db.articles.add({
         title: title.trim(),
         content: content.trim(),
         parsedHtml: data.parsedHtml,
+        sentences: data.sentences || [],
+        studyPlan: data.studyPlan || null,
         createdAt: now,
         updatedAt: now,
       });

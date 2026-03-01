@@ -25,7 +25,7 @@ const db = new Dexie("LeanBusinessEngDB") as Dexie & {
   appSettings: EntityTable<AppSettings, "id">;
 };
 
-db.version(3).stores({
+db.version(4).stores({
   articles: "++id, title, createdAt",
   vocabularies: "++id, articleId, word, nextReviewAt, mastery",
   sentencePatterns: "++id, articleId, pattern, nextReviewAt, mastery",

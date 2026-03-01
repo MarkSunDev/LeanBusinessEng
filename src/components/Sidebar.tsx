@@ -9,6 +9,7 @@ import { useState, useEffect } from "react";
 const navItems = [
   { href: "/", label: "学习主页", icon: "🏠" },
   { href: "/articles/new", label: "添加内容", icon: "📝" },
+  { href: "/library", label: "学习库", icon: "📚" },
   { href: "/review", label: "每日复习", icon: "🔄" },
   { href: "/quiz", label: "练习测验", icon: "💡" },
   { href: "/plan", label: "学习计划", icon: "📅" },

@@ -1,10 +1,31 @@
+/** 句子翻译 */
+export interface Sentence {
+  index: number;
+  english: string;
+  chinese: string;
+}
+
+/** AI 生成的学习计划建议 */
+export interface ArticleStudyPlan {
+  suggestedDailyNewWords: number;
+  suggestedDailyReviewTarget: number;
+  suggestedDailyMinutes: number;
+  estimatedDaysToComplete: number;
+  difficulty: "简单" | "中等" | "困难";
+  focusAreas: string[];
+}
+
 /** 文章/句子录入 */
 export interface Article {
   id?: number;
   title: string;
   content: string;
-  /** AI 解析后的 HTML（含高亮标注） */
+  /** AI 解析后的 HTML（含高亮标注和句子翻译） */
   parsedHtml: string;
+  /** 句子翻译数组 */
+  sentences?: Sentence[];
+  /** AI 生成的学习计划建议 */
+  studyPlan?: ArticleStudyPlan;
   createdAt: Date;
   updatedAt: Date;
 }
