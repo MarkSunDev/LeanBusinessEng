@@ -142,6 +142,9 @@ export async function performBackup(): Promise<boolean> {
   try {
     const data = await exportAllData();
     const jsonString = JSON.stringify(data, null, 2);
+    // 添加 UTF-8 BOM 头，帮助系统识别文件类型
+    const BOM = '\uFEFF';
+    const content = BOM + jsonString;
 
     // 创建带时间戳的文件名
     const date = new Date();
@@ -155,7 +158,7 @@ export async function performBackup(): Promise<boolean> {
       { create: true }
     );
     const mainWritable = await mainFileHandle.createWritable();
-    await mainWritable.write(jsonString);
+    await mainWritable.write(content);
     await mainWritable.close();
 
     // 同时创建带时间戳的历史备份
@@ -164,7 +167,7 @@ export async function performBackup(): Promise<boolean> {
       { create: true }
     );
     const historyWritable = await historyFileHandle.createWritable();
-    await historyWritable.write(jsonString);
+    await historyWritable.write(content);
     await historyWritable.close();
 
     backupState.lastBackupTime = new Date();
@@ -179,7 +182,10 @@ export async function performBackup(): Promise<boolean> {
 // 下载备份文件（降级方案）
 export function downloadBackupFile(data: unknown): void {
   const jsonString = JSON.stringify(data, null, 2);
-  const blob = new Blob([jsonString], { type: "application/json" });
+  // 添加 UTF-8 BOM 头，帮助 macOS 识别文件类型
+  const BOM = '\uFEFF';
+  const content = BOM + jsonString;
+  const blob = new Blob([content], { type: "application/json; charset=utf-8" });
   const url = URL.createObjectURL(blob);
 
   const date = new Date();
@@ -190,6 +196,8 @@ export function downloadBackupFile(data: unknown): void {
   const a = document.createElement("a");
   a.href = url;
   a.download = fileName;
+  // 添加 referrer 策略
+  a.referrerPolicy = "no-referrer";
   document.body.appendChild(a);
   a.click();
   document.body.removeChild(a);
