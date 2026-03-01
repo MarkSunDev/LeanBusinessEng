@@ -20,12 +20,15 @@ export default function NewArticlePage() {
 
   // 解析结果缓存
   const [parsedData, setParsedData] = useState<{
+    title?: string;
+    tags?: string[];
     parsedHtml: string;
     sentences: Array<{ index: number; english: string; chinese: string }>;
     vocabularies: Array<any>;
     patterns: Array<any>;
   } | null>(null);
   const [savedArticleId, setSavedArticleId] = useState<number | null>(null);
+  const [aiGeneratedTags, setAiGeneratedTags] = useState<string[]>([]);
 
   async function handleParse(retryCount = 0) {
     if (!content.trim()) return;
@@ -43,12 +46,17 @@ export default function NewArticlePage() {
       const data = await analyzeContent(content, retryCount);
 
       console.log("Parse successful:", {
+        title: data.title,
+        tags: data.tags,
         sentencesCount: data.sentences?.length || 0,
         vocabulariesCount: data.vocabularies?.length || 0,
         patternsCount: data.patterns?.length || 0,
       });
 
       setParsedData(data);
+      if (data.tags) {
+        setAiGeneratedTags(data.tags);
+      }
 
       // 直接保存文章（不生成计划）
       const articleId = await saveArticleDirectly(data);
@@ -67,7 +75,7 @@ export default function NewArticlePage() {
     const now = new Date();
 
     const articleId = await db.articles.add({
-      title: title.trim() || "未命名内容",
+      title: title.trim() || data.title || "未命名内容",
       content: content.trim(),
       parsedHtml: data.parsedHtml,
       sentences: data.sentences,
@@ -281,6 +289,22 @@ export default function NewArticlePage() {
         <p className="text-[14px] text-[var(--text-secondary)] mb-6">
           内容已保存到学习库，你可以选择生成 AI 学习计划
         </p>
+
+        {/* AI 生成标签 */}
+        {aiGeneratedTags.length > 0 && (
+          <div className="mb-4">
+            <div className="flex flex-wrap gap-2">
+              {aiGeneratedTags.map((tag, index) => (
+                <span
+                  key={index}
+                  className="text-[12px] px-3 py-1.5 bg-[var(--primary-50)] text-[var(--primary-dark)] rounded-full font-medium"
+                >
+                  #{tag}
+                </span>
+              ))}
+            </div>
+          </div>
+        )}
 
         {/* 解析结果预览 */}
         <div className="card p-5 mb-6">

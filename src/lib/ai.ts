@@ -30,6 +30,8 @@ async function fetchWithTimeout(
 
 /** 调用 AI 解析内容（带超时） */
 export async function analyzeContent(content: string, retryCount = 0): Promise<{
+  title?: string;
+  tags?: string[];
   parsedHtml: string;
   sentences: Array<{ index: number; english: string; chinese: string }>;
   vocabularies: Array<{
