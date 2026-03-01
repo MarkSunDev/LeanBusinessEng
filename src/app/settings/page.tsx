@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import { db, getAppSettings } from "@/lib/db";
 import {
   DEFAULT_ANALYZE_PROMPT,
@@ -8,6 +8,19 @@ import {
   DEFAULT_MODEL,
   DEFAULT_BASE_URL,
 } from "@/lib/prompts";
+import {
+  isFileSystemAccessSupported,
+  selectBackupDirectory,
+  getBackupDirectoryName,
+  clearBackupSettings,
+  performBackup,
+  exportAllData,
+  downloadBackupFile,
+  importFromFile,
+  initBackupState,
+  getAutoSync,
+  setAutoSync,
+} from "@/lib/backup";
 import type { AppSettings } from "@/types";
 
 export default function SettingsPage() {
@@ -28,6 +41,14 @@ export default function SettingsPage() {
   const [evaluatePrompt, setEvaluatePrompt] = useState("");
   const [showKey, setShowKey] = useState(false);
 
+  // 备份状态
+  const [backupDirName, setBackupDirName] = useState<string | null>(null);
+  const [isBackingUp, setIsBackingUp] = useState(false);
+  const [backupMessage, setBackupMessage] = useState<{ type: "success" | "error"; text: string } | null>(null);
+  const [autoSync, setAutoSyncState] = useState(true);
+  const [isImporting, setIsImporting] = useState(false);
+  const fileInputRef = useRef<HTMLInputElement>(null);
+
   useEffect(() => {
     getAppSettings().then((s) => {
       setSettings(s);
@@ -37,6 +58,11 @@ export default function SettingsPage() {
       setAnalyzePrompt(s.analyzePrompt);
       setEvaluatePrompt(s.evaluatePrompt);
     });
+
+    // 初始化备份状态
+    initBackupState();
+    setBackupDirName(getBackupDirectoryName());
+    setAutoSyncState(getAutoSync());
   }, []);
 
   async function handleSave() {
@@ -109,6 +135,85 @@ export default function SettingsPage() {
   function handleResetPrompts() {
     setAnalyzePrompt(DEFAULT_ANALYZE_PROMPT);
     setEvaluatePrompt(DEFAULT_EVALUATE_PROMPT);
+  }
+
+  // 备份相关函数
+  async function handleSelectBackupDir() {
+    setBackupMessage(null);
+    try {
+      const success = await selectBackupDirectory();
+      if (success) {
+        setBackupDirName(getBackupDirectoryName());
+        setBackupMessage({ type: "success", text: "备份目录已设置，初始备份已完成" });
+      }
+    } catch (err) {
+      const message = err instanceof Error ? err.message : "设置备份目录失败";
+      setBackupMessage({ type: "error", text: message });
+    }
+  }
+
+  function handleClearBackup() {
+    clearBackupSettings();
+    setBackupDirName(null);
+    setBackupMessage({ type: "success", text: "备份设置已清除" });
+  }
+
+  async function handleManualBackup() {
+    setIsBackingUp(true);
+    setBackupMessage(null);
+    try {
+      const success = await performBackup();
+      if (success) {
+        setBackupMessage({ type: "success", text: "备份成功完成" });
+      }
+    } catch (err) {
+      const message = err instanceof Error ? err.message : "备份失败";
+      setBackupMessage({ type: "error", text: message });
+    } finally {
+      setIsBackingUp(false);
+    }
+  }
+
+  async function handleDownloadBackup() {
+    setBackupMessage(null);
+    try {
+      const data = await exportAllData();
+      downloadBackupFile(data);
+      setBackupMessage({ type: "success", text: "备份文件已下载" });
+    } catch (err) {
+      const message = err instanceof Error ? err.message : "导出失败";
+      setBackupMessage({ type: "error", text: message });
+    }
+  }
+
+  async function handleImportFile(event: React.ChangeEvent<HTMLInputElement>) {
+    const file = event.target.files?.[0];
+    if (!file) return;
+
+    setIsImporting(true);
+    setBackupMessage(null);
+
+    const result = await importFromFile(file);
+
+    if (result.success) {
+      setBackupMessage({
+        type: "success",
+        text: `导入成功：${result.stats?.articles || 0} 篇文章，${result.stats?.vocabularies || 0} 个词汇，${result.stats?.patterns || 0} 个句式`
+      });
+    } else {
+      setBackupMessage({ type: "error", text: result.message });
+    }
+
+    setIsImporting(false);
+    // 清空 input 以便可以再次选择同一文件
+    if (fileInputRef.current) {
+      fileInputRef.current.value = "";
+    }
+  }
+
+  function handleAutoSyncChange(enabled: boolean) {
+    setAutoSyncState(enabled);
+    setAutoSync(enabled);
   }
 
   if (!settings) {
@@ -229,6 +334,135 @@ export default function SettingsPage() {
               </span>
             )}
           </div>
+        </div>
+      </div>
+
+      {/* 数据备份 */}
+      <div className="card p-5">
+        <h3 className="text-[15px] font-semibold text-[var(--text-primary)] mb-4 flex items-center gap-2">
+          💾 数据备份
+          {backupDirName && (
+            <span className="text-[11px] font-medium px-2 py-0.5 rounded-full bg-[var(--success-50)] text-green-700">
+              已启用
+            </span>
+          )}
+        </h3>
+
+        <p className="text-[13px] text-[var(--text-secondary)] mb-4">
+          将学习数据备份到本地文件夹，防止浏览器缓存清除导致数据丢失。
+          支持 macOS 12+ 和 Windows 10/11 的 Chrome/Edge 浏览器。
+        </p>
+
+        {!isFileSystemAccessSupported() && (
+          <div className="p-3.5 bg-[var(--warning-50)] border border-amber-200 rounded-[var(--radius-md)] text-[13px] text-amber-700 mb-4">
+            ⚠️ 您的浏览器不支持自动备份功能。请使用 Chrome、Edge 或 Safari 16+ 以获得最佳体验。
+          </div>
+        )}
+
+        <div className="space-y-4">
+          {/* 备份目录状态 */}
+          <div className="flex items-center justify-between p-3 bg-[var(--bg-elevated)] rounded-lg">
+            <div>
+              <p className="text-[13px] font-medium text-[var(--text-primary)]">
+                备份目录
+              </p>
+              <p className="text-[12px] text-[var(--text-tertiary)]">
+                {backupDirName || "未设置"}
+              </p>
+            </div>
+            <div className="flex items-center gap-2">
+              {backupDirName ? (
+                <>
+                  <button
+                    onClick={handleManualBackup}
+                    disabled={isBackingUp}
+                    className="btn-secondary text-[12px]"
+                  >
+                    {isBackingUp ? "备份中..." : "立即备份"}
+                  </button>
+                  <button
+                    onClick={handleClearBackup}
+                    className="text-[12px] text-[var(--text-tertiary)] hover:text-red-500 px-2"
+                  >
+                    清除
+                  </button>
+                </>
+              ) : (
+                <button
+                  onClick={handleSelectBackupDir}
+                  disabled={!isFileSystemAccessSupported()}
+                  className="btn-primary text-[12px]"
+                >
+                  选择文件夹
+                </button>
+              )}
+            </div>
+          </div>
+
+          {/* 自动同步开关 */}
+          {backupDirName && (
+            <div className="flex items-center justify-between">
+              <div>
+                <p className="text-[13px] font-medium text-[var(--text-primary)]">
+                  自动同步
+                </p>
+                <p className="text-[12px] text-[var(--text-tertiary)]">
+                  数据变更后自动备份到本地
+                </p>
+              </div>
+              <button
+                onClick={() => handleAutoSyncChange(!autoSync)}
+                className={`relative inline-flex h-6 w-11 items-center rounded-full transition-colors ${
+                  autoSync ? "bg-[var(--primary)]" : "bg-[var(--bg-elevated)]"
+                }`}
+              >
+                <span
+                  className={`inline-block h-4 w-4 transform rounded-full bg-white transition-transform ${
+                    autoSync ? "translate-x-6" : "translate-x-1"
+                  }`}
+                />
+              </button>
+            </div>
+          )}
+
+          {/* 手动导出/导入 */}
+          <div className="border-t border-[var(--border)] pt-4">
+            <p className="text-[13px] font-medium text-[var(--text-primary)] mb-3">
+              手动备份
+            </p>
+            <div className="flex flex-wrap gap-3">
+              <button
+                onClick={handleDownloadBackup}
+                className="btn-secondary text-[12px]"
+              >
+                下载备份文件
+              </button>
+              <label className="btn-secondary text-[12px] cursor-pointer">
+                <input
+                  ref={fileInputRef}
+                  type="file"
+                  accept=".json"
+                  onChange={handleImportFile}
+                  disabled={isImporting}
+                  className="hidden"
+                />
+                {isImporting ? "导入中..." : "从文件导入"}
+              </label>
+            </div>
+          </div>
+
+          {/* 消息提示 */}
+          {backupMessage && (
+            <div
+              className={`p-3 rounded-[var(--radius-md)] text-[13px] ${
+                backupMessage.type === "success"
+                  ? "bg-[var(--success-50)] text-green-700 border border-green-200"
+                  : "bg-[var(--error-50)] text-red-700 border border-red-200"
+              }`}
+            >
+              {backupMessage.type === "success" ? "✅" : "❌"} {backupMessage.text}
+            </div>
+          )}
         </div>
       </div>
 

@@ -14,6 +14,7 @@ import {
   DEFAULT_MODEL,
   DEFAULT_BASE_URL,
 } from "@/lib/prompts";
+import { scheduleAutoBackup } from "./backup";
 
 const db = new Dexie("LeanBusinessEngDB") as Dexie & {
   articles: EntityTable<Article, "id">;
@@ -34,6 +35,27 @@ db.version(4).stores({
   dailyLogs: "++id, &date",
   appSettings: "++id",
 });
+
+// 监听数据变化，触发自动备份
+db.articles.hook("creating", () => { scheduleAutoBackup(); });
+db.articles.hook("updating", () => { scheduleAutoBackup(); });
+db.articles.hook("deleting", () => { scheduleAutoBackup(); });
+
+db.vocabularies.hook("creating", () => { scheduleAutoBackup(); });
+db.vocabularies.hook("updating", () => { scheduleAutoBackup(); });
+db.vocabularies.hook("deleting", () => { scheduleAutoBackup(); });
+
+db.sentencePatterns.hook("creating", () => { scheduleAutoBackup(); });
+db.sentencePatterns.hook("updating", () => { scheduleAutoBackup(); });
+db.sentencePatterns.hook("deleting", () => { scheduleAutoBackup(); });
+
+db.quizRecords.hook("creating", () => { scheduleAutoBackup(); });
+db.quizRecords.hook("updating", () => { scheduleAutoBackup(); });
+db.quizRecords.hook("deleting", () => { scheduleAutoBackup(); });
+
+db.dailyLogs.hook("creating", () => { scheduleAutoBackup(); });
+db.dailyLogs.hook("updating", () => { scheduleAutoBackup(); });
+db.dailyLogs.hook("deleting", () => { scheduleAutoBackup(); });
 
 export { db };
 
