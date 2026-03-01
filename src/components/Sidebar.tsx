@@ -14,6 +14,7 @@ const navItems = [
   { href: "/quiz", label: "练习测验", icon: "💡" },
   { href: "/plan", label: "学习计划", icon: "📅" },
   { href: "/settings", label: "设置", icon: "⚙️" },
+  { href: "/about", label: "关于", icon: "ℹ️" },
 ];
 
 export function Sidebar({ onClose }: { onClose?: () => void }) {
@@ -105,9 +106,13 @@ export function Sidebar({ onClose }: { onClose?: () => void }) {
 
       {/* 底部 */}
       <div className="px-5 py-4 border-t border-[var(--border-light)]">
-        <p className="text-[11px] text-[var(--text-tertiary)]">
-          v1.0 · 本地模式 · 数据存储于浏览器
-        </p>
+        <Link
+          href="/about"
+          onClick={onClose}
+          className="text-[11px] text-[var(--text-tertiary)] hover:text-[var(--primary)] transition-colors"
+        >
+          v1.1.0 · 本地模式 · 数据存储于浏览器
+        </Link>
       </div>
     </aside>
   );

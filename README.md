@@ -93,7 +93,8 @@ src/
 │   ├── review/page.tsx           # 每日复习（翻卡片+自评）
 │   ├── quiz/page.tsx             # 练习测验（造句+AI评判）
 │   ├── plan/page.tsx             # 学习计划（目标+热力图+方法论）
-│   └── settings/page.tsx         # 设置（API配置+Prompt管理）
+│   ├── settings/page.tsx         # 设置（API配置+Prompt管理）
+│   └── about/page.tsx            # 关于（版本信息+功能特色+版本历史）
 ├── components/
 │   ├── AppShell.tsx              # 响应式外壳（桌面+移动端）
 │   └── Sidebar.tsx               # 侧边栏导航（含待复习徽章+连续天数）
